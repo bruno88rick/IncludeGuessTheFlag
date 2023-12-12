@@ -125,7 +125,7 @@ struct ContentView: View {
                 Button("Start New Game", action: startGame)
                     .frame(width: 250, height: 100, alignment: .center)
                     .background(Color(red: 0.1, green: 0.2, blue: 0.45))
-                    .foregroundStyle(.regularMaterial)
+                    .foregroundStyle(.white)
                     .font(.title2.bold())
                     .clipShape(.capsule)
                     .shadow(radius: 10)
