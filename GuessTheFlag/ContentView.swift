@@ -7,6 +7,16 @@
 
 import SwiftUI
 
+struct FlagImage: View {
+    var image: String
+
+    var body: some View {
+        Image(image)
+            .clipShape(.capsule)
+            .shadow(radius: 5)
+    }
+}
+
 extension View {
     func hiddenConditionally(isHidden: Bool) -> some View {
         isHidden ? AnyView(self.hidden()) : AnyView(self)
@@ -54,9 +64,7 @@ struct ContentView: View {
                             Button {
                                 flagTapped(number)
                             } label: {
-                                Image(countries[number])
-                                    .clipShape(.capsule)
-                                    .shadow(radius: 5)
+                                FlagImage(image: "\(countries[number])")
                             } .alert(scoreTitle, isPresented: $showingScore){
                                 if question < 8 {
                                     Button("Continue..."){
