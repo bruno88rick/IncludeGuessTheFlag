@@ -17,15 +17,31 @@ struct FlagImage: View {
     }
 }
 
+struct LargeText: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.largeTitle.bold())
+            .foregroundStyle(.white)
+    }
+}
+
 extension View {
     func hiddenConditionally(isHidden: Bool) -> some View {
         isHidden ? AnyView(self.hidden()) : AnyView(self)
     }
+    
+    func proeminentTitle() -> some View {
+        modifier(LargeText())
+    }
 }
 
 struct ContentView: View {
-    @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Spain", "UK", "Ukraine", "US"].shuffled()
+    
+    static let allCountries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Spain", "UK", "Ukraine", "US"]
+    
+    @State private var countries = allCountries.shuffled()
     @State private var correctAnswer = Int.random(in: 0...2)
+    @State private var showingResult = false
     @State private var showingScore = false
     @State private var scoreTitle = ""
     @State private var question = 0
@@ -48,8 +64,7 @@ struct ContentView: View {
                 VStack {
                     Spacer()
                     Text("Include Guess The Flag")
-                        .font(.title .bold())
-                        .foregroundStyle(.white)
+                        .proeminentTitle()
                     Spacer()
                     VStack(spacing: 15) {
                         VStack (spacing: 10){
@@ -66,31 +81,26 @@ struct ContentView: View {
                             } label: {
                                 FlagImage(image: "\(countries[number])")
                             } .alert(scoreTitle, isPresented: $showingScore){
-                                if question < 8 {
-                                    Button("Continue..."){
-                                        if question < 8 {
-                                            askQuestion()
-                                        } else if question == 8 {
-                                            activeBlur = true
-                                            startButtonHide = false
-                                        }
-                                    }
-                                } else if question == 8 {
-                                    Button("End Game"){
-                                        activeBlur = true
-                                        startButtonHide = false
-                                    }
+                                Button("Continue..."){
+                                    askQuestion()
                                 }
                                 //other way do set an action to a Button
                                 /*
                                  Button("Continue...", action: askQuestion)
                                  */
                             } message: {
-                                if question < 8 {
-                                    Text("Your score is \(totalCorrect)")
-                                } else if question == 8 {
-                                    Text("End game! 🎮 Your score was \(totalCorrect) and wrong answer was \(totalWrong) ")
+                                Text("Your score is \(totalCorrect)")
+                            }
+                            .alert ("\(scoreTitle), but the Game is over! 🎮", isPresented: $showingResult){
+                                Button("Start a New Game"){
+                                    startGame()
                                 }
+                                Button("End Game"){
+                                    activeBlur = true
+                                    startButtonHide = false
+                                }
+                            } message: {
+                                Text("Your score was \(totalCorrect) and you asnwer \(totalWrong) flags wrong. Play again")
                             }
                         }
                     }
@@ -131,14 +141,27 @@ struct ContentView: View {
             scoreTitle = "Correct!😃 Congrats!🎊"
             countScore(correct: true)
         } else {
-            scoreTitle = "Wrong!😭 That's the flag of \(countries[number])"
-            countScore(correct: false)
+            
+            let needsThe = ["US", "UK"]
+            let theirAnswer = countries[number]
+            
+            if needsThe.contains(theirAnswer) {
+                scoreTitle = "Wrong!😭 That's the flag of the \(theirAnswer)"
+            } else {
+                scoreTitle = "Wrong!😭 That's the flag of \(theirAnswer)"
+            }
+                countScore(correct: false)
         }
         
-        showingScore = true
+        if question < 8 {
+            showingScore = true
+        } else if question == 8 {
+            showingResult = true
+        }
     }
     
     func askQuestion() {
+        countries.remove(at: correctAnswer)
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
     }
@@ -149,6 +172,7 @@ struct ContentView: View {
         totalCorrect = 0
         totalWrong = 0
         question = 0
+        countries = Self.allCountries
         askQuestion()
     }
     
