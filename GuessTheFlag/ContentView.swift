@@ -20,7 +20,7 @@ struct FlagImage: View {
 struct LargeText: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.largeTitle.bold())
+            .font(.title.bold())
             .foregroundStyle(.white)
     }
 }
