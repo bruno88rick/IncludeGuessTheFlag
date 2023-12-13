@@ -7,16 +7,6 @@
 
 import SwiftUI
 
-struct FlagImage: View {
-    var image: String
-
-    var body: some View {
-        Image(image)
-            .clipShape(.capsule)
-            .shadow(radius: 5)
-    }
-}
-
 struct LargeText: ViewModifier {
     func body(content: Content) -> some View {
         content
@@ -79,7 +69,7 @@ struct ContentView: View {
                             Button {
                                 flagTapped(number)
                             } label: {
-                                FlagImage(image: "\(countries[number])")
+                                FlagImage(image: countries[number])
                             } .alert(scoreTitle, isPresented: $showingScore){
                                 Button("Continue..."){
                                     askQuestion()
