@@ -9,6 +9,7 @@ import SwiftUI
 
 struct FlagImage: View {
     var image: String
+    var rotationAmount = 0.0
 
     var body: some View {
         Image(image)

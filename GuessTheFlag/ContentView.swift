@@ -41,6 +41,9 @@ struct ContentView: View {
     @State private var activeBlur = true
     @State private var startButtonHide = false
     
+    //track flag to apply effects
+    @State private var selectedFlag = -1
+    
     var body: some View {
         
         ZStack{
@@ -57,12 +60,14 @@ struct ContentView: View {
                         .proeminentTitle()
                     Spacer()
                     VStack(spacing: 15) {
-                        VStack (spacing: 10){
+                        VStack (spacing: 10) {
                             Text("Tap the flag of")
                                 .font(.subheadline.weight(.heavy))
                                 .foregroundStyle(.secondary)
                             Text(countries[correctAnswer])
                                 .font(.largeTitle.weight(.semibold))
+                                .opacity(selectedFlag == -1 ? 1 : 0)
+                                .animation(.easeOut(duration: 0.5), value: selectedFlag)
                         }
                         
                         ForEach(0..<3){ number in
@@ -70,7 +75,23 @@ struct ContentView: View {
                                 flagTapped(number)
                             } label: {
                                 FlagImage(image: countries[number])
-                            } .alert(scoreTitle, isPresented: $showingScore){
+                            }
+                            //if selectedFlag was the number who was selected, apply a 360 rotarion on y axis
+                            .rotation3DEffect(
+                                .degrees(selectedFlag == number ? 360 : 0),
+                                axis: (x: 0, y: 1, z: 0)
+                            )
+                            //apply effects on not selected flags (selectedFlag Track == -1) or if selectedeFlag was == to number
+                            .opacity(selectedFlag == -1 || selectedFlag == number ? 1 : 0.25)
+                            .scaleEffect(selectedFlag == -1 || selectedFlag == number ? 1 : 0.25)
+                            .blur(radius: selectedFlag == -1 || selectedFlag == number ? 0 : 4)
+                            .saturation(selectedFlag == -1 || selectedFlag == number ? 1 : 0)
+                            .animation(.spring(
+                                duration: 0.5,
+                                bounce: 0.6),
+                                value: selectedFlag
+                            )
+                            .alert(scoreTitle, isPresented: $showingScore){
                                 Button("Continue..."){
                                     askQuestion()
                                 }
@@ -111,6 +132,7 @@ struct ContentView: View {
                 .padding()
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
                 .blur(radius: activeBlur ? 10 : 0)
+                .animation(.spring, value: activeBlur)
                 
                 Button("Start New Game", action: startGame)
                     .frame(width: 250, height: 100, alignment: .center)
@@ -143,6 +165,9 @@ struct ContentView: View {
                 countScore(correct: false)
         }
         
+        //store in variable what flag was tapped
+        selectedFlag = number
+        
         if question < 8 {
             showingScore = true
         } else if question == 8 {
@@ -154,6 +179,8 @@ struct ContentView: View {
         countries.remove(at: correctAnswer)
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        //return @state track flag image tapped back to -1
+        selectedFlag = -1
     }
     
     func startGame() {
